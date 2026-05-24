@@ -14,59 +14,120 @@ body { background: #111; color: white; text-align: center; font-family: sans-ser
 #subtitle-controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 #subtitle-controls button { background: var(--main-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-weight: bold; }
 #subtitle-controls button:hover { filter: brightness(1.2); }
+
 #video-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; }
 #video-container { position: relative; width: min(95vw, 640px); aspect-ratio: 16 / 9; background: black; border-radius: 10px; overflow: hidden; }
 #player, #player iframe { width: 100%; height: 100%; display: block; }
+
+/* 傳統底部翻譯字幕 */
 #subtitle { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 18px; font-family: "Arial Rounded MT Bold", "微軟正黑體", sans-serif; color: white; background: rgba(0,0,0,0.7); padding: 8px 14px; border-radius: 8px; white-space: pre-line; max-width: 90%; width: fit-content; pointer-events: none; z-index: 10; line-height: 1.5; display: none; }
 #exitFsBtn { display: none; position: absolute; right: 20px; bottom: 20px; background: var(--main-color); color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; z-index: 20; }
-#bottom-bar { margin-top: 15px; margin-bottom: 25px; }
+
+/* 底部控制列 */
+#bottom-bar { margin-top: 15px; margin-bottom: 15px; display: flex; gap: 10px; }
 #fullscreenBtn { background: var(--main-color); color: white; border: none; padding: 10px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 #fullscreenBtn:hover { filter: brightness(1.2); }
+
+/* --- 觀眾彈幕畫布（純顯示，不干擾點擊） --- */
+#danmaku-container { position: absolute; top: 0; left: 0; width: 100%; height: 85%; z-index: 5; overflow: hidden; pointer-events: none; }
+.danmaku-item { position: absolute; left: 100%; white-space: nowrap; color: #fff; font-weight: bold; font-family: "微軟正黑體", sans-serif; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; font-size: 20px; will-change: transform; transition: transform linear; }
+
+/* 底部固定彈幕發送欄 */
+#danmaku-send-bar { margin-bottom: 35px; display: flex; gap: 8px; width: min(95vw, 640px); align-items: center; position: relative; }
+#danmaku-input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; font-size: 15px; }
+#danmaku-input:focus { outline: none; border-color: var(--main-color); }
+#danmaku-send-bar button { background: var(--main-color); color: white; border: none; padding: 0 24px; border-radius: 6px; height: 43px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 15px; }
+#danmaku-send-bar button:hover { filter: brightness(1.2); }
+
+/* 顏色選擇器專用樣式 */
+#color-picker-wrapper { position: relative; display: flex; align-items: center; }
+#color-icon-btn { background: #222; border: 1px solid #444; border-radius: 6px; width: 43px; height: 43px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; transition: 0.3s; user-select: none; }
+#color-icon-btn:hover { border-color: var(--main-color); background: #2a2a2a; }
+#color-menu { display: none; position: absolute; bottom: 50px; left: 0; background: #222; border: 1px solid #444; padding: 8px; border-radius: 8px; grid-template-columns: repeat(4, 1fr); gap: 6px; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+.color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; box-sizing: border-box; }
+.color-dot:hover { transform: scale(1.15); border-color: #fff; }
+.color-dot.active { border-color: #fff; box-shadow: 0 0 4px #fff; }
+
 #video-container:fullscreen { width: 100vw; height: 100vh; border-radius: 0; }
 #video-container:fullscreen #player, #video-container:fullscreen iframe { width: 100vw; height: 100vh; }
-#video-container:fullscreen #subtitle { font-size: 4vh; bottom: 8vh; }
+#video-container:fullscreen #subtitle { bottom: 8vh; }
 #video-container:fullscreen #exitFsBtn { display: block; }
 
 @media (max-width: 768px) {
   #title { font-size: 18px; padding: 0 15px; margin-top: 18px; margin-bottom: 18px; }
   #video-container { width: 100vw; border-radius: 0; }
   #subtitle { font-size: 15px; bottom: 14px; max-width: 92%; padding: 6px 10px; }
-  #subtitle-controls button, #fullscreenBtn { font-size: 14px; padding: 8px 14px; }
+  #subtitle-controls button, #fullscreenBtn, #danmaku-send-bar button { font-size: 14px; padding: 8px 14px; }
+  .danmaku-item { font-size: 16px; }
+  #danmaku-send-bar { width: 100vw; padding: 0 10px; box-sizing: border-box; }
+  #danmaku-input { padding: 10px; font-size: 14px; }
+  #color-icon-btn { width: 38px; height: 38px; font-size: 18px; }
+  #danmaku-send-bar button { height: 38px; }
 }
 </style>
 </head>
 
 <body>
 
-<div id="title">
-ASEA + 延世大學校友會 Vlog - by LEO
-</div>
+<div id="title">ASEA + 延世大學校友會 Vlog - by LEO</div>
 
 <div id="top-controls">
   <div id="subtitle-controls">
     <button onclick="changeFontSize(2)">放大</button>
     <button onclick="changeFontSize(-2)">縮小</button>
     <button onclick="resetFontSize()">復原</button>
+    <button onclick="toggleDanmaku()" id="toggleDanmakuBtn">關閉彈幕</button>
   </div>
 </div>
 
 <div id="video-wrapper">
   <div id="video-container">
     <div id="player"></div>
+    
+    <div id="danmaku-container"></div> 
+    
     <div id="subtitle">字幕載入中...</div>
     <button id="exitFsBtn" onclick="exitFullScreen()">退出全螢幕</button>
   </div>
+  
   <div id="bottom-bar">
     <button id="fullscreenBtn" onclick="enterFullScreen()">全螢幕</button>
+  </div>
+
+  <div id="danmaku-send-bar">
+    <div id="color-picker-wrapper">
+      <div id="color-icon-btn" onclick="toggleColorMenu(event)">🎨</div>
+      <div id="color-menu">
+        <div class="color-dot active" style="background: #FFFFFF;" onclick="selectDanmakuColor('#FFFFFF', this)"></div>
+        <div class="color-dot" style="background: #RAL3001;" onclick="selectDanmakuColor('#RAL3001', this)"></div>
+        <div class="color-dot" style="background: #e27602;" onclick="selectDanmakuColor('#e27602', this)"></div>
+        <div class="color-dot" style="background: #FAC03D;" onclick="selectDanmakuColor('#FAC03D', this)"></div>
+        <div class="color-dot" style="background: #3D6036;" onclick="selectDanmakuColor('#3D6036', this)"></div>
+        <div class="color-dot" style="background: #5698c3;" onclick="selectDanmakuColor('#5698c3', this)"></div>
+        <div class="color-dot" style="background: #815C94;" onclick="selectDanmakuColor('#815C94', this)"></div>
+        <div class="color-dot" style="background: #000000;" onclick="selectDanmakuColor('#000000', this)"></div>
+        <div class="color-dot" style="background: #a0a3a4;" onclick="selectDanmakuColor('#a0a3a4', this)"></div>
+        <div class="color-dot" style="background: #694B3C;" onclick="selectDanmakuColor('#694B3C', this)"></div>
+      </div>
+    </div>
+    
+    <input type="text" id="danmaku-input" placeholder="在這裡輸入彈幕..." onkeydown="if(event.key==='Enter') sendAndSaveDanmaku()">
+    <button onclick="sendAndSaveDanmaku()">發送</button>
   </div>
 </div>
 
 <script>
-// 1. 定義變數
 const videoId = "Daqs3ZZP_js";
 let player = null;
+let danmakuEnabled = true;
+let lastCheckedTime = 0;
 
-// 2. 字幕清單 
+// 觀眾發送的彈幕陣列（會儲存至瀏覽器）
+let userDanmakus = [];
+// 當前選擇的彈幕顏色（預設白色）
+let selectedColor = "#FFFFFF";
+
+// 傳統官方翻譯字幕（只留在底部，絕不會變成彈幕飛過去）
 const subtitles = [
   { time: 0, text: "今天是 ASEA\n出發前正在停車中" },
   { time: 2, text: "日本的味道" },
@@ -97,7 +158,22 @@ const subtitles = [
   { time: 51, text: "到宿舍啦" },
 ];
 
-// 3. 載入 YouTube API
+// 初始化：從 LocalStorage 載入以前儲存過的觀眾彈幕
+function loadDanmakus() {
+  const saved = localStorage.getItem("saved_danmakus");
+  if (saved) {
+    userDanmakus = JSON.parse(saved);
+  } else {
+    userDanmakus = [];
+    saveDanmakus();
+  }
+}
+
+function saveDanmakus() {
+  localStorage.setItem("saved_danmakus", JSON.stringify(userDanmakus));
+}
+
+// 載入 YouTube API
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -116,80 +192,168 @@ function onYouTubeIframeAPIReady() {
       'origin': window.location.origin
     },
     events: {
-      'onReady': onPlayerReady,
-      'onError': onPlayerError
+      'onReady': onPlayerReady
     }
   });
 }
 
 function onPlayerReady(event) {
-  setInterval(updateSubtitle, 200);
+  loadDanmakus(); 
+  setInterval(videoLoop, 200); 
 }
 
-function onPlayerError(e) {
-  console.error("播放器出錯，代碼：" + e.data);
+function videoLoop() {
+  if(!player || typeof player.getCurrentTime !== 'function') return;
+  const currentTime = player.getCurrentTime();
+  
+  // 1. 更新底部翻譯字幕
+  updateSubtitle(currentTime);
+  
+  // 2. 檢查並噴發「觀眾儲存的彈幕」
+  if (danmakuEnabled && player.getPlayerState() === 1) { 
+    userDanmakus.forEach(dan => {
+      if (currentTime >= dan.videoTime && lastCheckedTime < dan.videoTime) {
+        renderDanmakuItem(dan.text, dan.top, dan.color || "#FFFFFF"); 
+      }
+    });
+  }
+  lastCheckedTime = currentTime;
 }
 
-// 4. 字幕更新邏輯
-function updateSubtitle(){
-  if(!player || !player.getCurrentTime || typeof player.getCurrentTime !== 'function') return;
-
-  const t = player.getCurrentTime();
+// 底部官方翻譯字幕渲染
+function updateSubtitle(t){
   let text = "";
-
   for(let i = subtitles.length - 1; i >= 0; i--){
     const sub = subtitles[i];
     if(t >= sub.time){
-      if(sub.endTime && t >= sub.endTime) {
-        text = ""; 
-      } else {
-        text = sub.text;
-      }
+      if(sub.endTime && t >= sub.endTime) { text = ""; } 
+      else { text = sub.text; }
       break; 
     }
   }
-
   const subEl = document.getElementById("subtitle");
-  if(text === "") {
-    subEl.style.display = "none";
-  } else {
-    subEl.style.display = "block";
-    subEl.innerText = text;
+  if(text === "") { subEl.style.display = "none"; } 
+  else { subEl.style.display = "block"; subEl.innerText = text; }
+}
+
+// --- 底部固定欄位發送與本地儲存核心邏輯 ---
+
+// 開啟/關閉顏色選擇選單
+function toggleColorMenu(event) {
+  event.stopPropagation();
+  const menu = document.getElementById("color-menu");
+  menu.style.display = menu.style.display === "grid" ? "none" : "grid";
+}
+
+// 選擇顏色邏輯
+function selectDanmakuColor(color, element) {
+  selectedColor = color;
+  // 切換選取外框樣式
+  const dots = document.querySelectorAll('.color-dot');
+  dots.forEach(dot => dot.classList.remove('active'));
+  element.classList.add('active');
+  // 隱藏選單
+  document.getElementById("color-menu").style.display = "none";
+}
+
+// 點擊網頁其他地方時自動收起顏色選單
+document.addEventListener("click", function() {
+  const menu = document.getElementById("color-menu");
+  if (menu) menu.style.display = "none";
+});
+
+function sendAndSaveDanmaku() {
+  const inputField = document.getElementById("danmaku-input");
+  const text = inputField.value.trim();
+  
+  if (text !== "" && player && typeof player.getCurrentTime === 'function') {
+    const currentVideoTime = player.getCurrentTime();
+    
+    // 隨機分配一個垂直高度軌道 (12% ~ 75% 之間)，避免彈幕總是重疊在一起
+    const randomTop = Math.floor(Math.random() * 63) + 12;
+    
+    const newDanmaku = {
+      videoTime: currentVideoTime, 
+      text: text,                  
+      top: randomTop,
+      color: selectedColor
+    };
+    
+    userDanmakus.push(newDanmaku);
+    saveDanmakus();
+    
+    // 畫面上立刻飛出這條彈幕
+    renderDanmakuItem(text, randomTop, selectedColor);
+    
+    // 確保欄位立即清空，一次只發送這一個彈幕
+    inputField.value = "";
   }
 }
 
-// 5. 控制功能
+// 在畫面上把彈幕渲染並動起來的引擎
+function renderDanmakuItem(text, topPosition, itemColor) {
+  const container = document.getElementById("danmaku-container");
+  const danmaku = document.createElement("div");
+  danmaku.className = "danmaku-item";
+  danmaku.innerText = text;
+  danmaku.style.top = topPosition + "%";
+  danmaku.style.color = itemColor; // 使用儲存或選擇的顏色
+
+  container.appendChild(danmaku);
+
+  const containerWidth = container.offsetWidth;
+  const danmakuWidth = danmaku.offsetWidth || text.length * 20; 
+  const duration = Math.random() * 2 + 5; // 移動速度 5 ~ 7 秒
+
+  danmaku.style.transitionDuration = duration + "s";
+  
+  setTimeout(() => {
+    danmaku.style.transform = `translateX(-${containerWidth + danmakuWidth + 50}px)`;
+  }, 20);
+
+  setTimeout(() => { danmaku.remove(); }, duration * 1000);
+}
+
+// 觀眾彈幕顯示/關閉開關
+function toggleDanmaku() {
+  danmakuEnabled = !danmakuEnabled;
+  const btn = document.getElementById("toggleDanmakuBtn");
+  const container = document.getElementById("danmaku-container");
+  
+  if (danmakuEnabled) {
+    btn.innerText = "關閉彈幕";
+    container.style.display = "block";
+  } else {
+    btn.innerText = "開啟彈幕";
+    container.innerHTML = ""; 
+    container.style.display = "none";
+  }
+}
+
+// 全螢幕與字型控制
 let currentFontSize = 18;
-function changeFontSize(delta) {
-  currentFontSize += delta;
-  document.getElementById("subtitle").style.fontSize = currentFontSize + "px";
-}
-function resetFontSize() {
-  currentFontSize = 18;
-  document.getElementById("subtitle").style.fontSize = "18px";
-}
-
-function enterFullScreen() {
-  const elem = document.getElementById("video-container");
-  if (elem.requestFullscreen) { elem.requestFullscreen(); }
-  else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-  else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
-}
-
-function exitFullScreen() {
-  if (document.exitFullscreen) { document.exitFullscreen(); }
-  else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
-  else if (document.msExitFullscreen) { document.msExitFullscreen(); }
-}
-
-document.addEventListener('fullscreenchange', () => {
+function updateDisplayedFontSize() {
   const subEl = document.getElementById("subtitle");
   if (document.fullscreenElement) {
     subEl.style.fontSize = (currentFontSize * 1.5) + "px";
   } else {
     subEl.style.fontSize = currentFontSize + "px";
   }
-});
+}
+function changeFontSize(delta) { currentFontSize += delta; updateDisplayedFontSize(); }
+function resetFontSize() { currentFontSize = 18; updateDisplayedFontSize(); }
+
+function enterFullScreen() {
+  const elem = document.getElementById("video-container");
+  if (elem.requestFullscreen) { elem.requestFullscreen(); }
+  else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+}
+function exitFullScreen() {
+  if (document.exitFullscreen) { document.exitFullscreen(); }
+  else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+}
+document.addEventListener('fullscreenchange', updateDisplayedFontSize);
+document.addEventListener('webkitfullscreenchange', updateDisplayedFontSize);
 </script>
 
 </body>
