@@ -67,13 +67,20 @@ body {
   --main-color: #5698c3; 
 }
 
-/* 🔝 標題區 */
+/* 🔝 標題與字幕控制區（完美對照 image_9d9cc5.jpg 結構） */
 #title { 
-  font-size: 26px; 
-  margin: 20px auto; 
+  font-size: 28px; 
+  margin: 20px auto 15px auto; 
   font-weight: bold; 
   line-height: 1.5; 
   max-width: 95%; 
+}
+
+#subtitle-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 /* 🎬 核心外層大框框：寬度限制為影片寬度，使其完美居中 */
@@ -109,48 +116,76 @@ body {
 /* 💬 浮動字幕樣式 */
 #subtitle { 
   position: absolute; 
-  bottom: 20px; 
+  bottom: 12%; 
   left: 50%; 
   transform: translateX(-50%); 
-  font-size: 18px; 
+  font-size: 24px; /* 配合 70% 原始大小的體感字級 */
   color: white; 
-  background: rgba(0,0,0,0.7); 
-  padding: 8px 14px; 
+  background: rgba(0,0,0,0.65); 
+  padding: 8px 20px; 
   border-radius: 8px; 
   white-space: pre-line; 
-  max-width: 90%; 
+  max-width: 70%; /* 限制字幕最大寬度為原始大小的 70% */
   width: fit-content; 
   pointer-events: none; 
   z-index: 10; 
-  line-height: 1.5; 
+  line-height: 1.4; 
   display: none;
+  transition: font-size 0.2s ease;
 }
 
-/* 🎯 底部控制列 */
+/* 🎯 底部控制列（影片下方只留下全螢幕按鈕） */
 #bottom-block { 
   width: 100%; 
-  margin-top: 15px; 
+  margin-top: 20px; 
   margin-bottom: 35px; 
   display: flex; 
   flex-direction: column; 
   align-items: center; 
 }
 
-#fullscreenBtn { 
+/* 按鈕通用樣式（完美還原亮藍色風格） */
+.btn {
   background: var(--main-color); 
   color: white; 
   border: none; 
-  padding: 10px 30px; 
+  padding: 8px 22px; 
   border-radius: 6px; 
   cursor: pointer; 
   font-weight: bold; 
   transition: 0.3s; 
+  font-size: 15px;
 }
-#fullscreenBtn:hover { 
-  filter: brightness(1.2); 
+.btn:hover {
+  filter: brightness(1.1);
 }
 
-/* 📜 【核心！】右側獨立時間軸選單（利用絕對定位移到你畫的紅框位置） */
+/* 主按鈕（全螢幕）加寬加厚 */
+#fullscreenBtn { 
+  padding: 10px 35px;
+  font-size: 16px;
+}
+
+/* 🚪 進入全螢幕後在畫面右下方顯示的「退出全螢幕」按鈕 */
+#exitFullscreenBtn {
+  display: none; 
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20; 
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+#exitFullscreenBtn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+/* 當偵測到全螢幕狀態時，自動強制顯示該按鈕 */
+#video-container:fullscreen #exitFullscreenBtn,
+#video-container:-webkit-full-screen #exitFullscreenBtn {
+  display: block !important;
+}
+
+/* 📜 右側獨立時間軸選單 */
 #timeline-sidebar {
   position: absolute;
   left: 680px;      /* 將側欄推到置中影片的右側 (640px 影片 + 40px 間距) */
@@ -188,7 +223,7 @@ body {
 #timeline-sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 #timeline-sidebar::-webkit-scrollbar-thumb:hover { background: var(--main-color); }
 
-/* 📱 RWD 行動裝置自動適應（當螢幕寬度小於 1024px，選單會乖乖掉到影片下方，不擠壓排版） */
+/* 📱 RWD 行動裝置自動適應 */
 @media (max-width: 1024px) {
   #main-layout { max-width: min(95vw, 640px); }
   #timeline-sidebar {
@@ -203,8 +238,15 @@ body {
 
 <body>
 
-<!-- 網頁標題 -->
+<!-- 標題區 -->
 <div id="title">ASEA + 延世大學校友會 Vlog - by LEO</div>
+
+<!-- 字幕控制按鈕區（移至影片上方） -->
+<div id="subtitle-controls">
+  <button class="btn" onclick="adjustSubtitle(4)">放大</button>
+  <button class="btn" onclick="adjustSubtitle(-4)">縮小</button>
+  <button class="btn" onclick="resetSubtitle()">復原</button>
+</div>
 
 <!-- 主版面區塊 -->
 <div id="main-layout">
@@ -214,14 +256,17 @@ body {
     <div id="video-container">
       <div id="player"></div>
       <div id="subtitle"></div>
+      <!-- 全螢幕模式下才會跑出來的退出按鈕 -->
+      <button id="exitFullscreenBtn" class="btn" onclick="exitFullScreen()">退出全螢幕</button>
     </div>
     
+    <!-- 影片底部：僅留全螢幕按鈕 -->
     <div id="bottom-block">
-      <button id="fullscreenBtn" onclick="enterFullScreen()">全螢幕觀看</button>
+      <button id="fullscreenBtn" class="btn" onclick="enterFullScreen()">全螢幕</button>
     </div>
   </div>
 
-  <!-- 右側：獨立時間軸（完全不影響影片置中） -->
+  <!-- 右側：獨立時間軸 -->
   <div id="timeline-sidebar">
     <div id="sidebar-title">🕒 時間軸目錄</div>
     <div id="timeline-controls"></div>
@@ -229,9 +274,11 @@ body {
 
 </div>
 
-<!-- ⚙️ 核心 YouTube API 運作腳本（不用去動它） -->
+<!-- ⚙️ 核心 YouTube API 運作腳本 -->
 <script>
 let player = null;
+const defaultFontSize = 24; // 調整預設的 70% 原始大小
+let currentFontSize = defaultFontSize;
 
 // 載入 YouTube API
 var tag = document.createElement('script');
@@ -251,6 +298,7 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) { 
   initTimelineButtons();
+  resetSubtitle();
   setInterval(videoLoop, 200); 
 }
 
@@ -301,11 +349,33 @@ function initTimelineButtons() {
   });
 }
 
-// 全螢幕功能
+// 字幕放大縮小功能
+function adjustSubtitle(value) {
+  const subEl = document.getElementById("subtitle");
+  currentFontSize += value;
+  if (currentFontSize < 12) currentFontSize = 12; // 限制最小不要小於 12px
+  if (currentFontSize > 60) currentFontSize = 60; // 限制最大不要超過 60px
+  subEl.style.fontSize = currentFontSize + "px";
+}
+
+// 字幕復原功能
+function resetSubtitle() {
+  const subEl = document.getElementById("subtitle");
+  currentFontSize = defaultFontSize;
+  subEl.style.fontSize = currentFontSize + "px";
+}
+
+// 進入全螢幕
 function enterFullScreen() {
   const elem = document.getElementById("video-container");
   let req = elem.requestFullscreen || elem.webkitRequestFullscreen;
   if (req) req.call(elem);
+}
+
+// 離開全螢幕
+function exitFullScreen() {
+  let exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (exit) exit.call(document);
 }
 </script>
 </body>
